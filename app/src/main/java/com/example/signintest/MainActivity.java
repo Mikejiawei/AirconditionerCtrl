@@ -11,6 +11,11 @@ import android.widget.TextView;
 import com.example.signintest.util.Constants;
 import com.example.signintest.util.DataCache;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -30,7 +35,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         userBaseResponseEntity = (BaseResponseEntity) getIntent().getSerializableExtra("userBaseResponseEntity");
-        initViewData();
+        try {
+            initViewData();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         Button button = findViewById(R.id.launch);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -38,21 +47,32 @@ public class MainActivity extends AppCompatActivity {
                 projectInfo.setTextColor(Color.parseColor("#9900CC"));
                 final NetWorkBusiness netWorkBusiness = new NetWorkBusiness(DataCache.getAccessToken(getApplicationContext()), DataCache.getBaseUrl(getApplicationContext()));
                 netWorkBusiness.getProject(Constants.projectId, new NCallBack<BaseResponseEntity<ProjectInfo>>(getApplicationContext()) {
+
                     @Override
                     protected void onResponse(BaseResponseEntity<ProjectInfo> response) {
+
                         Tools.printJson(projectInfo, gson.toJson(response));
                     }
                 });
             }
         });
     }
-    protected void initViewData(){
+    protected void initViewData() throws JSONException {
         TextView LoginMsg = findViewById(R.id.loginMsg);
         projectInfo = findViewById(R.id.projectInfo);
         if (userBaseResponseEntity!=null&&userBaseResponseEntity.getStatus()==0){
             LoginMsg.setTextColor(Color.parseColor("#FF39C42F"));
             Gson gson = new Gson();
-            Tools.printJson(LoginMsg,gson.toJson(userBaseResponseEntity),false);
+            JSONObject jsonObject = new JSONObject(gson.toJson(userBaseResponseEntity));
+            int resultObj = (int) jsonObject.get("Status");
+            if(resultObj==0){
+                LoginMsg.setText("Signed in successfully!");
+            }
+//            JSONArray values = (JSONArray) resultObj.get("nameValuePairs");
+//            String name = values.getJSONObject(3).getString("UserName");
+//            LoginMsg.setText(name);
+
+//            Tools.printJson(LoginMsg,gson.toJson(userBaseResponseEntity),false);
         }
     }
 }
