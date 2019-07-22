@@ -1,15 +1,20 @@
 package com.example.signintest;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.signintest.util.Constants;
 import com.example.signintest.util.DataCache;
@@ -38,8 +43,12 @@ public class DetailActivity extends AppCompatActivity {
     private NetWorkBusiness netWorkBusiness;
     private SPHelper spHelper;
     private String deviceID;
+    private ImageView mAirStateImageView;
+    private boolean isDeviceExist = false;
+    private  boolean isDeviceOnline = false;
     private static final int GET_REMOTE_INFO = 101;
     private static final int GET_REMOTE_INFO_DELAY = 1000;
+    private Context mContext;
 
     Handler mHandler = new Handler() {
         @Override
@@ -67,11 +76,16 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+        mContext = this;
         deviceID = (String) getIntent().getSerializableExtra("device");
         netWorkBusiness = new NetWorkBusiness(DataCache.getAccessToken(getApplicationContext()),DataCache.getBaseUrl(getApplicationContext()));
         initView();
-//        initEvent();
+        initEvent();
         getDeviceInfo(deviceID);
+    }
+
+    private void initEvent() {
+        mAirStateImageView.setOnClickListener(new ControlPowerListener());
     }
 
     private void getDeviceInfo(String deviceID) {
@@ -101,20 +115,22 @@ public class DetailActivity extends AppCompatActivity {
         });
 
     }
-
+//  检查设备是否存在
     private void displayExistState(int status) {
         if (status == 0){
             Log.d(TAG, "displayExistState: >>It exists!");
+            isDeviceExist = true;
             mOnlineLayout.setVisibility(View.GONE);
             queryRemoteInfo();
         }else{
+            isDeviceExist = false;
             mOnlineLayout.setVisibility(View.VISIBLE);
             mOnlineText.setText("设备不存在");
             Log.d(TAG, "displayExistState: >>设备-");
         }
 
     }
-
+//  数据查询函数
     private void queryRemoteInfo() {
         final Gson gson = new Gson();
 //        查询设备在线情况
@@ -125,11 +141,14 @@ public class DetailActivity extends AppCompatActivity {
                     boolean value = false;
                     try {
                         JSONObject jsonObject = new JSONObject(gson.toJson(response));
-                        JSONArray resultObj = (JSONArray) jsonObject.get("ResultObj");
-//                        value = resultObj.getJSONObject(7).getBoolean("IsOnline");
+                        JSONArray result = (JSONArray) jsonObject.get("ResultObj");
+                        Log.d(TAG, ">>>Online: "+result);
+                        value = result.getJSONObject(1).getBoolean("IsOnline");
+//                        value = resultObj.getBoolean("IsOnline");
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                    displayOnlineState(value);
                 }else{
                     Log.d(TAG, "onResponse: get Online status fail");
                 }
@@ -159,16 +178,87 @@ public class DetailActivity extends AppCompatActivity {
         mHandler.sendEmptyMessageDelayed(GET_REMOTE_INFO, GET_REMOTE_INFO_DELAY);
     }
 
+    private void displayOnlineState(boolean status) {
+        isDeviceOnline = status;
+        if(!status){
+            mOnlineLayout.setVisibility(View.VISIBLE);
+            mOnlineText.setText("设备已离线");
+        }else{
+            mOnlineLayout.setVisibility(View.GONE);
+        }
+    }
+//  温度展示函数
     private void displayCurrentTemp(int value) {
         Log.d(TAG, "displayCurrentTemp: " + value);
         mCurrentTempText.setText(value + "°C");
     }
-
+//  初始化组件
     private void initView() {
+        mAirStateImageView = (ImageView) findViewById(R.id.switch_imageview);
+        mAirStateImageView.setTag(false);
         mCurrentTempLayout = findViewById(R.id.currentTemp_layout);
         mOnlineLayout = findViewById(R.id.online_layout);
         mOnlineText = findViewById(R.id.online_text);
         mCurrentTempText = findViewById(R.id.currentTemp_text);
         mCurrentTempTextTitle = findViewById(R.id.currentTemp_title);
+
+    }
+//  控制器函数--监听器
+    private class ControlPowerListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            if (!isDeviceExist){
+                Log.d(TAG, "onClick: Device is not exist");
+                Toast.makeText(mContext,"设备不存在，请确认",Toast.LENGTH_LONG).show();
+                return;
+            }
+            if (!isDeviceOnline){
+                Toast.makeText(mContext,"设备已离线，请确认",Toast.LENGTH_LONG).show();
+                return;
+            }
+            final int controlValue = (boolean) mAirStateImageView.getTag() == false ? 1:0;
+            final Gson gson = new Gson();
+//            调用命令控制接口
+            netWorkBusiness.control(deviceID, Constants.apiTagPowerCtrl, controlValue, new NCallBack<BaseResponseEntity>(getApplicationContext()) {
+                @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+                @Override
+                protected void onResponse(BaseResponseEntity response) {
+                    if(response!=null){
+                        try {
+                            JSONObject jsonObject = new JSONObject(gson.toJson(response));
+                            int status = (int) jsonObject.get("Status");
+                            Log.d(TAG, "control PowerCtrl Status: "+status);
+                            if(0==status){
+                                displayPowerStatus(controlValue);
+                            }else{
+                                Log.d(TAG, "return status value is error, open boc fail!");
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+    private void displayPowerStatus(int control) {
+        if (control==Constants.closePowerValue){
+            displayPowerStatusClose();
+        }else if(control == Constants.openPowerValue){
+            displayPowerStatusOpen();
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+    private void displayPowerStatusClose() {
+        mAirStateImageView.setBackground(getResources().getDrawable(R.mipmap.off));
+        mAirStateImageView.setTag(false);
+    }
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+    private void displayPowerStatusOpen() {
+        mAirStateImageView.setBackground(getResources().getDrawable(R.mipmap.on));
+        mAirStateImageView.setTag(true);
     }
 }

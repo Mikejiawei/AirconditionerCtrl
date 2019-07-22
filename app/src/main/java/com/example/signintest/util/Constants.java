@@ -32,6 +32,10 @@ public class Constants {
     public static String projectId = "34148";
     public static String deviceId = "";
     public static String apiTagCurrentTemp = "currentTemp";
+    public static String apiTagPowerCtrl = "";
+    public static int openPowerValue = 1;
+    public static int closePowerValue = 0;
+
 
     public static String getStartTime() {
         Calendar calendar = Calendar.getInstance();
