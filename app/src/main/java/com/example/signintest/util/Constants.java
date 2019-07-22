@@ -26,12 +26,12 @@ public class Constants {
 
     public static String PLATFORMADDRESS = "api.nlecloud.com";
     public static  String PORT = "80";
-    public static String userName = "15270013718";
-    public static String pwd = "86569232XJW";
+    public static String userName = "18745910366";
+    public static String pwd = "liuhuijun990423";
 
-    public static String projectId = "34129";
+    public static String projectId = "34148";
     public static String deviceId = "";
-    public static String apiTag = "";
+    public static String apiTagCurrentTemp = "currentTemp";
 
     public static String getStartTime() {
         Calendar calendar = Calendar.getInstance();

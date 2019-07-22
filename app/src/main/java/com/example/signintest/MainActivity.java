@@ -2,10 +2,12 @@ package com.example.signintest;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.signintest.util.Constants;
@@ -34,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        final EditText deviceID = findViewById(R.id.deviceID);
         userBaseResponseEntity = (BaseResponseEntity) getIntent().getSerializableExtra("userBaseResponseEntity");
         try {
             initViewData();
@@ -44,14 +47,22 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                projectInfo.setTextColor(Color.parseColor("#9900CC"));
+//                projectInfo.setTextColor(Color.parseColor("#9900CC"));
                 final NetWorkBusiness netWorkBusiness = new NetWorkBusiness(DataCache.getAccessToken(getApplicationContext()), DataCache.getBaseUrl(getApplicationContext()));
                 netWorkBusiness.getProject(Constants.projectId, new NCallBack<BaseResponseEntity<ProjectInfo>>(getApplicationContext()) {
 
                     @Override
                     protected void onResponse(BaseResponseEntity<ProjectInfo> response) {
-
-                        Tools.printJson(projectInfo, gson.toJson(response));
+                        if (response!=null){
+                            String device = deviceID.getText().toString();
+                            Intent intent = new Intent(MainActivity.this,DetailActivity.class);
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable("device", device);
+                            intent.putExtras(bundle);
+                            startActivity(intent);
+                            finish();
+                        }
+//                        Tools.printJson(projectInfo, gson.toJson(response));
                     }
                 });
             }
@@ -59,14 +70,17 @@ public class MainActivity extends AppCompatActivity {
     }
     protected void initViewData() throws JSONException {
         TextView LoginMsg = findViewById(R.id.loginMsg);
-        projectInfo = findViewById(R.id.projectInfo);
+//        projectInfo = findViewById(R.id.projectInfo);
         if (userBaseResponseEntity!=null&&userBaseResponseEntity.getStatus()==0){
             LoginMsg.setTextColor(Color.parseColor("#FF39C42F"));
+            LoginMsg.setTextSize(20);
             Gson gson = new Gson();
             JSONObject jsonObject = new JSONObject(gson.toJson(userBaseResponseEntity));
+            JSONObject resObj = (JSONObject) jsonObject.get("ResultObj");
+            String usrName = resObj.getString("UserName");
             int resultObj = (int) jsonObject.get("Status");
             if(resultObj==0){
-                LoginMsg.setText("Signed in successfully!");
+                LoginMsg.setText("Welcome "+usrName+"\nSigned in successfully!");
             }
 //            JSONArray values = (JSONArray) resultObj.get("nameValuePairs");
 //            String name = values.getJSONObject(3).getString("UserName");
