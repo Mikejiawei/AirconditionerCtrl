@@ -80,8 +80,8 @@ public class DetailActivity extends AppCompatActivity {
         deviceID = (String) getIntent().getSerializableExtra("device");
         netWorkBusiness = new NetWorkBusiness(DataCache.getAccessToken(getApplicationContext()),DataCache.getBaseUrl(getApplicationContext()));
         initView();
-        initEvent();
         getDeviceInfo(deviceID);
+        initEvent();
     }
 
     private void initEvent() {
@@ -143,12 +143,12 @@ public class DetailActivity extends AppCompatActivity {
                         JSONObject jsonObject = new JSONObject(gson.toJson(response));
                         JSONArray result = (JSONArray) jsonObject.get("ResultObj");
                         Log.d(TAG, ">>>Online: "+result);
-                        value = result.getJSONObject(1).getBoolean("IsOnline");
-//                        value = resultObj.getBoolean("IsOnline");
+                        value = result.getJSONObject(0).getBoolean("IsOnline");
+                        displayOnlineState(value);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    displayOnlineState(value);
+
                 }else{
                     Log.d(TAG, "onResponse: get Online status fail");
                 }
@@ -180,6 +180,7 @@ public class DetailActivity extends AppCompatActivity {
 
     private void displayOnlineState(boolean status) {
         isDeviceOnline = status;
+        Log.d(TAG, "displayOnlineState: >>" + status );
         if(!status){
             mOnlineLayout.setVisibility(View.VISIBLE);
             mOnlineText.setText("设备已离线");
@@ -213,6 +214,7 @@ public class DetailActivity extends AppCompatActivity {
                 return;
             }
             if (!isDeviceOnline){
+                Log.d(TAG, "onClick: >>>"+isDeviceOnline);
                 Toast.makeText(mContext,"设备已离线，请确认",Toast.LENGTH_LONG).show();
                 return;
             }
