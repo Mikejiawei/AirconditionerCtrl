@@ -38,8 +38,8 @@ import retrofit2.Call;
 public class DetailActivity extends AppCompatActivity {
 
     private static final String TAG = "DetailActivity";
-    private LinearLayout mCurrentTempLayout,mOnlineLayout;
-    private TextView mCurrentTempText,mCurrentTempTextTitle,mOnlineText;
+    private LinearLayout mCurrentTempLayout,mOnlineLayout,mUpperLimitLayout,mLowerLimitlayout;
+    private TextView mCurrentTempText,mCurrentTempTextTitle,mOnlineText,mUpperLimitTemp,mLowerLimitTemp,mUpperLimitTempTitle,mLowerLimitTempTitle;
     private NetWorkBusiness netWorkBusiness;
     private SPHelper spHelper;
     private String deviceID;
@@ -155,7 +155,7 @@ public class DetailActivity extends AppCompatActivity {
 
             }
         });
-//       查询单个传感器
+//       查询单个传感器,实时的温度
           netWorkBusiness.getSensor(deviceID, Constants.apiTagCurrentTemp, new NCallBack<BaseResponseEntity<SensorInfo>>(getApplicationContext()) {
               @Override
               protected void onResponse(BaseResponseEntity<SensorInfo> response) {
@@ -175,7 +175,53 @@ public class DetailActivity extends AppCompatActivity {
                   }
               }
           });
+        //    查询温度上限值
+        netWorkBusiness.getSensor(deviceID, Constants.apiTagUpperLimit, new NCallBack<BaseResponseEntity<SensorInfo>>(getApplicationContext()) {
+            @Override
+            protected void onResponse(BaseResponseEntity<SensorInfo> response) {
+                if (response!=null){
+                    try {
+                        JSONObject jsonObject = new JSONObject(gson.toJson(response));
+                        JSONObject resultObj = (JSONObject) jsonObject.get("ResultObj");
+                        String value = (String) resultObj.get("Value");
+//                        Log.d(TAG, "onResponse: Upper>>>" + value);
+                        displayUpperTemp(Integer.parseInt(value));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }else{
+                    Log.d(TAG, "onResponse: Get UpperLimit failed!");
+                }
+            }
+        });
+//        查询温度下限值
+        netWorkBusiness.getSensor(deviceID, Constants.apiTagLowerLimit, new NCallBack<BaseResponseEntity<SensorInfo>>(getApplicationContext()) {
+            @Override
+            protected void onResponse(BaseResponseEntity<SensorInfo> response) {
+                if (response!=null){
+                    try {
+                        JSONObject jsonObject = new JSONObject(gson.toJson(response));
+                        JSONObject resultObj = (JSONObject) jsonObject.get("ResultObj");
+                        String value = (String) resultObj.get("Value");
+//                        Log.d(TAG, "onResponse: Upper>>>" + value);
+                        displayLowerTemp(Integer.parseInt(value));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }else{
+                    Log.d(TAG, "onResponse: Get LowerLimit failed!");
+                }
+            }
+        });
         mHandler.sendEmptyMessageDelayed(GET_REMOTE_INFO, GET_REMOTE_INFO_DELAY);
+    }
+
+    private void displayUpperTemp(int upperTemp) {
+        mUpperLimitTemp.setText(upperTemp+"°C");
+    }
+
+    private void displayLowerTemp(int lowerTemp){
+        mLowerLimitTemp.setText(lowerTemp+"°C");
     }
 
     private void displayOnlineState(boolean status) {
@@ -197,6 +243,10 @@ public class DetailActivity extends AppCompatActivity {
     private void initView() {
         mAirStateImageView = (ImageView) findViewById(R.id.switch_imageview);
         mAirStateImageView.setTag(false);
+        mUpperLimitTemp = findViewById(R.id.upperLimitTemp_text);
+        mUpperLimitTempTitle = findViewById(R.id.upperTemp_Title);
+        mLowerLimitTemp = findViewById(R.id.lowerLimitTemp_text);
+        mLowerLimitTempTitle = findViewById(R.id.lowerTemp_Title);
         mCurrentTempLayout = findViewById(R.id.currentTemp_layout);
         mOnlineLayout = findViewById(R.id.online_layout);
         mOnlineText = findViewById(R.id.online_text);

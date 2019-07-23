@@ -107,7 +107,7 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:layout_weight="1"
             android:gravity="center|left">
 
@@ -144,8 +144,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginBottom="10sp"
             android:text="Powered by '刘卉君','谢嘉威','段小辉'"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:textColor="@color/bg_trans_green"/>
     </LinearLayout>
     <LinearLayout
