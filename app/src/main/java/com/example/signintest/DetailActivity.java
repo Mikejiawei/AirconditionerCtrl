@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 import com.example.signintest.util.Constants;
 import com.example.signintest.util.DataCache;
 import com.example.signintest.util.SPHelper;
+import com.facebook.stetho.Stetho;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -49,6 +51,7 @@ public class DetailActivity extends AppCompatActivity {
     private static final int GET_REMOTE_INFO = 101;
     private static final int GET_REMOTE_INFO_DELAY = 1000;
     private Context mContext;
+    private Button callData;
 
     Handler mHandler = new Handler() {
         @Override
@@ -76,6 +79,7 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+        Stetho.initializeWithDefaults(this);
         mContext = this;
         deviceID = (String) getIntent().getSerializableExtra("device");
         netWorkBusiness = new NetWorkBusiness(DataCache.getAccessToken(getApplicationContext()),DataCache.getBaseUrl(getApplicationContext()));
@@ -86,6 +90,7 @@ public class DetailActivity extends AppCompatActivity {
 
     private void initEvent() {
         mAirStateImageView.setOnClickListener(new ControlPowerListener());
+        callData.setOnClickListener(new CallDataListener());
     }
 
     private void getDeviceInfo(String deviceID) {
@@ -252,6 +257,7 @@ public class DetailActivity extends AppCompatActivity {
         mOnlineText = findViewById(R.id.online_text);
         mCurrentTempText = findViewById(R.id.currentTemp_text);
         mCurrentTempTextTitle = findViewById(R.id.currentTemp_title);
+        callData = findViewById(R.id.callData);
 
     }
 //  控制器函数--监听器
@@ -312,5 +318,14 @@ public class DetailActivity extends AppCompatActivity {
     private void displayPowerStatusOpen() {
         mAirStateImageView.setBackground(getResources().getDrawable(R.mipmap.on));
         mAirStateImageView.setTag(true);
+    }
+
+    private class CallDataListener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent(DetailActivity.this,DataAcitivity.class);
+            startActivity(intent);
+//            finish();
+        }
     }
 }

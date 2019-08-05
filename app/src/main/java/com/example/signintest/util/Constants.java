@@ -23,13 +23,14 @@ public class Constants {
     public final static String LOGIN_PWD = "LOGIN_PWD";
     public final static String BASE_URL = "BASE_URL";
     public final static String ACCESS_TOKEN = "ACCESS_TOKEN";
-
+//  帐号
     public static String PLATFORMADDRESS = "api.nlecloud.com";
     public static  String PORT = "80";
     public static String userName = "18745910366";
     public static String pwd = "liuhuijun990423";
-
     public static String projectId = "34148";
+// 传感器
+
     public static String deviceId = "";
     public static String apiTagCurrentTemp = "currentTemp";
     public static String apiTagPowerCtrl = "control";

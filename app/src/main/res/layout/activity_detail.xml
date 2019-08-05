@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="6dp"
-        android:layout_weight="6"
+        android:layout_weight="8"
         android:gravity="center"
         android:orientation="vertical">
 
@@ -20,13 +20,14 @@
             android:layout_weight="2"
             android:gravity="center"
             android:orientation="horizontal">
+
             <LinearLayout
                 android:id="@+id/upperLimitTemp_layout"
-                android:orientation="vertical"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="5"
-                android:background="@mipmap/control_red">
+                android:background="@mipmap/control_red"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/upperLimitTemp_text"
@@ -36,6 +37,7 @@
                     android:layout_marginTop="35sp"
                     android:text="0C°"
                     android:textSize="35sp" />
+
                 <TextView
                     android:id="@+id/upperTemp_Title"
                     android:layout_width="wrap_content"
@@ -120,6 +122,8 @@
                 android:textSize="20sp" />
         </LinearLayout>
 
+
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -134,6 +138,21 @@
                 android:layout_height="wrap_content"
                 android:background="@mipmap/off" />
         </LinearLayout>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/callData"
+            android:layout_width="0dp"
+            android:layout_marginTop="10dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="查询数据" />
+
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
