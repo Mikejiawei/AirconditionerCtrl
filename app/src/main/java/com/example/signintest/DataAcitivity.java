@@ -36,12 +36,14 @@ public class DataAcitivity extends AppCompatActivity {
     private SQLiteDatabase db;
     private Button get;
     private Button next;
+    private Button prev;
     private Timer timer;
     private int valueT;
     private String Time;
     private ArrayList<Entry> values = new ArrayList<>();
     private LineDataSet set1;
     private int p =0;
+    private boolean flag = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,9 +162,19 @@ public class DataAcitivity extends AppCompatActivity {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(p<5){
-                    showData(p++);
-
+                if (flag){
+                    showData(0);
+                    flag=false;
+                }else if (p<5){
+                    showData(++p);
+                }
+            }
+        });
+        prev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (p>=1){
+                    showData(--p);
                 }
             }
         });
@@ -212,5 +224,6 @@ public class DataAcitivity extends AppCompatActivity {
         chart = (LineChart) findViewById(R.id.mLineChar);
         get = findViewById(R.id.get);
         next = findViewById(R.id.next);
+        prev = findViewById(R.id.prev);
     }
 }
